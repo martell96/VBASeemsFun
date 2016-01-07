@@ -1,0 +1,52 @@
+Sub ClearFields()
+    With Me
+            .ComboBox1 = ""
+            .TextBox3 = ""
+            .TextBox4 = ""
+            .TextBox5 = ""
+            .TextBox6 = ""
+            .TextBox7 = ""
+        End With
+End Sub
+
+Private Sub CommandButton1_Click()
+    With Me
+        .TextBox1 = ""
+        ClearFields
+    End With
+End Sub
+
+Private Sub CommandButton3_Click()
+    
+    ClearFields
+    LastRow = ThisWorkbook.Sheets("Issue Log").Cells(Rows.Count, 2).End(xlUp).End(xlUp).Row - 4
+    Me.TextBox1.Value = LastRow
+    
+End Sub
+
+Private Sub TextBox1_AfterUpdate()
+
+    ClearFields
+    
+    'If nothing was input
+    If Me.TextBox1.Value = "" Then
+        Exit Sub
+    End If
+    
+    'Check if value non existing
+    If WorksheetFunction.CountIf(Sheet1.Range("B:B"), Me.TextBox1.Value) = 0 Then
+        MsgBox "Nothing"
+        Exit Sub
+    End If
+    
+    'If existing, lookup for existing values then
+    With Me
+        .ComboBox1 = Application.WorksheetFunction.VLookup(CLng(Me.TextBox1), Sheet1.Range("issueTable"), 2, 0)
+        .TextBox3 = Application.WorksheetFunction.VLookup(CLng(Me.TextBox1), Sheet1.Range("issueTable"), 3, 0)
+        .TextBox4 = Application.WorksheetFunction.VLookup(CLng(Me.TextBox1), Sheet1.Range("issueTable"), 4, 0)
+        .TextBox5 = Application.WorksheetFunction.VLookup(CLng(Me.TextBox1), Sheet1.Range("issueTable"), 5, 0)
+        .TextBox6 = Application.WorksheetFunction.VLookup(CLng(Me.TextBox1), Sheet1.Range("issueTable"), 6, 0)
+        .TextBox7 = Application.WorksheetFunction.VLookup(CLng(Me.TextBox1), Sheet1.Range("issueTable"), 8, 0)
+    End With
+
+End Sub
