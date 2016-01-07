@@ -1,52 +1,92 @@
 Sub ClearFields()
     With Me
-            .ComboBox1 = ""
-            .TextBox3 = ""
-            .TextBox4 = ""
-            .TextBox5 = ""
-            .TextBox6 = ""
-            .TextBox7 = ""
+            .cmbOpenBy = ""
+            .tbIssue = ""
+            .tbCustName = ""
+            .tbCustPhone = ""
+            .tbDateOpen = ""
+            .tbDateClose = ""
+            .tbComments = ""
         End With
 End Sub
 
-Private Sub CommandButton1_Click()
+Private Sub btnAccept_Click()
+    'If Ticket Number Empty...
+    If Me.tbTicketNo.Value = "" Then
+        Unload Me
+        Exit Sub
+    End If
+    
+    'Set sheet name
+    Dim issSheet As Worksheet
+    Set issSheet = ThisWorkbook.Sheets("Issue Log")
+    
+    'Write Values
+    issSheet.Cells(Me.tbTicketNo.Value + 5, 2) = Me.tbTicketNo.Value
+    issSheet.Cells(Me.tbTicketNo.Value + 5, 3) = Me.cmbOpenBy.Value
+    issSheet.Cells(Me.tbTicketNo.Value + 5, 4) = Me.tbIssue.Value
+    issSheet.Cells(Me.tbTicketNo.Value + 5, 5) = Me.tbCustName.Value
+    issSheet.Cells(Me.tbTicketNo.Value + 5, 6) = Me.tbCustPhone.Value
+    issSheet.Cells(Me.tbTicketNo.Value + 5, 7) = CDate(Me.tbDateOpen.Value)
+    
+    'But if no Close Date...
+    If Me.tbDateClose.Value <> "" Then
+        issSheet.Cells(Me.tbTicketNo.Value + 5, 8) = CDate(Me.tbDateClose.Value)
+    End If
+    
+    issSheet.Cells(Me.tbTicketNo.Value + 5, 9) = Me.tbComments.Value
+    Unload Me
+End Sub
+
+Private Sub btnClear_Click()
     With Me
-        .TextBox1 = ""
+        .tbTicketNo = ""
         ClearFields
     End With
 End Sub
 
-Private Sub CommandButton3_Click()
-    
-    ClearFields
-    LastRow = ThisWorkbook.Sheets("Issue Log").Cells(Rows.Count, 2).End(xlUp).End(xlUp).Row - 4
-    Me.TextBox1.Value = LastRow
-    
+Private Sub btnMarkAsFixed_Click()
+    Me.tbDateClose = Date
 End Sub
 
-Private Sub TextBox1_AfterUpdate()
+Private Sub btwNewTicket_Click()
+    ClearFields
+    LastRow = ThisWorkbook.Sheets("Issue Log").Cells(Rows.Count, 2).End(xlUp).End(xlUp).Row - 4
+    Me.tbTicketNo.Value = LastRow
+    Me.tbDateOpen = Date
+End Sub
 
+Private Sub tbTicketNo_AfterUpdate()
+    'CleanEverything!
     ClearFields
     
     'If nothing was input
-    If Me.TextBox1.Value = "" Then
+    If Me.tbTicketNo.Value = "" Then
         Exit Sub
     End If
     
     'Check if value non existing
-    If WorksheetFunction.CountIf(Sheet1.Range("B:B"), Me.TextBox1.Value) = 0 Then
-        MsgBox "Nothing"
+    If WorksheetFunction.CountIf(Sheet1.Range("B:B"), Me.tbTicketNo.Value) = 0 Then
         Exit Sub
     End If
     
     'If existing, lookup for existing values then
     With Me
-        .ComboBox1 = Application.WorksheetFunction.VLookup(CLng(Me.TextBox1), Sheet1.Range("issueTable"), 2, 0)
-        .TextBox3 = Application.WorksheetFunction.VLookup(CLng(Me.TextBox1), Sheet1.Range("issueTable"), 3, 0)
-        .TextBox4 = Application.WorksheetFunction.VLookup(CLng(Me.TextBox1), Sheet1.Range("issueTable"), 4, 0)
-        .TextBox5 = Application.WorksheetFunction.VLookup(CLng(Me.TextBox1), Sheet1.Range("issueTable"), 5, 0)
-        .TextBox6 = Application.WorksheetFunction.VLookup(CLng(Me.TextBox1), Sheet1.Range("issueTable"), 6, 0)
-        .TextBox7 = Application.WorksheetFunction.VLookup(CLng(Me.TextBox1), Sheet1.Range("issueTable"), 8, 0)
+        .cmbOpenBy = Application.WorksheetFunction.VLookup(CLng(Me.tbTicketNo), Sheet1.Range("issueTable"), 2, 0)
+        .tbIssue = Application.WorksheetFunction.VLookup(CLng(Me.tbTicketNo), Sheet1.Range("issueTable"), 3, 0)
+        .tbCustName = Application.WorksheetFunction.VLookup(CLng(Me.tbTicketNo), Sheet1.Range("issueTable"), 4, 0)
+        .tbCustPhone = Application.WorksheetFunction.VLookup(CLng(Me.tbTicketNo), Sheet1.Range("issueTable"), 5, 0)
+        .tbDateOpen = CDate(Application.WorksheetFunction.VLookup(CLng(Me.tbTicketNo), Sheet1.Range("issueTable"), 6, 0))
+        If Application.WorksheetFunction.VLookup(CLng(Me.tbTicketNo), Sheet1.Range("issueTable"), 7, 0) <> "" Then
+            .tbDateClose = CDate(Application.WorksheetFunction.VLookup(CLng(Me.tbTicketNo), Sheet1.Range("issueTable"), 7, 0))
+        End If
+        .tbComments = Application.WorksheetFunction.VLookup(CLng(Me.tbTicketNo), Sheet1.Range("issueTable"), 8, 0)
     End With
+End Sub
 
+Private Sub UserForm_Initialize()
+        'Fill ComboBox!
+        For Each wkName In [OpenByList]
+            Me.cmbOpenBy.AddItem wkName
+        Next wkName
 End Sub
