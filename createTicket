@@ -44,7 +44,7 @@ Private Sub btnAccept_Click()
         issSheet.Cells(Me.tbTicketNo.Value + 5, 10) = CDate(Me.tbDateClose.Value)
     End If
     
-    issSheet.Cells(Me.tbTicketNo.Value + 5, 11) = Me.tbComments.Value
+    issSheet.Cells(Me.tbTicketNo.Value + 5, 11) = Me.tbComments.Value & vbNewLine & "Updated on " & Format(Now)
     Unload Me
 End Sub
 
@@ -56,6 +56,17 @@ Private Sub btnClear_Click()
 End Sub
 
 Private Sub btnCustID_Click()
+
+    'Save Customer's ID
+    Dim custID
+    custID = Me.tbCustID.Value
+    
+    'Clean Everything!
+    ClearFields
+    
+    'Restore Customer's ID
+    Me.tbCustID.Value = custID
+    
     'If nothing was input
     If Me.tbCustID.Value = "" Then
         MsgBox ("Input Customer's ID in Customer's ID field")
@@ -68,16 +79,6 @@ Private Sub btnCustID_Click()
         Exit Sub
     End If
     
-    'Save Customer's ID
-    Dim custID
-    custID = Me.tbCustID.Value
-    
-    'Clean Everything!
-    ClearFields
-    
-    'Restore Customer's ID
-    Me.tbCustID.Value = custID
-    
     'If existing, find the ticket number and then just do a ticket number search.
     With Me
         .tbTicketNo = Evaluate("LOOKUP(2,1/(D:D =" & Me.tbCustID.Value & "),B:B)")
@@ -86,6 +87,16 @@ Private Sub btnCustID_Click()
 End Sub
 
 Private Sub btnCustPhone_Click()
+    'Save Customer's Phone
+    Dim custPhone
+    custPhone = Me.tbCustPhone
+    
+    'Clean Everything!
+    ClearFields
+    
+    'Restore Customer's Phone
+    Me.tbCustPhone = custPhone
+    
     'If nothing was input
     If Me.tbCustPhone.Value = "" Then
         MsgBox ("Input Customer's Phone in Customer's Phone field")
@@ -97,20 +108,10 @@ Private Sub btnCustPhone_Click()
         MsgBox ("Customer's Phone not found")
         Exit Sub
     End If
-    
-    'Save Customer's Phone
-    Dim custPhone
-    custPhone = Me.tbCustPhone
-    
-    'Clean Everything!
-    ClearFields
-    
-    'Restore Customer's Phone
-    Me.tbCustPhone = custPhone
       
     'If existing, find the ticket number and then just do a ticket number search.
     With Me
-        .tbTicketNo = Evaluate("LOOKUP(2,1/(F:F =" & Me.tbCustPhone.Value & "),B:B)")
+        .tbTicketNo = Evaluate("LOOKUP(2,1/(F:F =""" & Me.tbCustPhone.Value & """),B:B)")
         btnSearchByTicketNo_Click
     End With
 End Sub
@@ -121,6 +122,16 @@ Private Sub btnMarkAsFixed_Click()
 End Sub
 
 Private Sub btnSearchByTicketNo_Click()
+    'Save Ticket Number
+    Dim ticketNo
+    ticketNo = Me.tbTicketNo.Value
+    
+    'CleanEverything!
+    ClearFields
+    
+    'Restore Ticket Number
+    Me.tbTicketNo.Value = ticketNo
+    
     'If nothing was input
     If Me.tbTicketNo.Value = "" Then
         MsgBox ("Input Ticket Number in Ticket Number field")
@@ -133,15 +144,6 @@ Private Sub btnSearchByTicketNo_Click()
         Exit Sub
     End If
     
-    'Save Ticket Number
-    Dim ticketNo
-    ticketNo = Me.tbTicketNo.Value
-    
-    'CleanEverything!
-    ClearFields
-    
-    'Restore Ticket Number
-    Me.tbTicketNo.Value = ticketNo
     
     'If existing, lookup for existing values then
     With Me
@@ -162,6 +164,8 @@ Private Sub btnSearchByTicketNo_Click()
         .btnAccept.Caption = "Update Ticket"
         .btnAccept.Enabled = True
         
+        'And disable ticket field
+        .tbTicketNo.Locked = True
     End With
 End Sub
 
@@ -175,6 +179,22 @@ Private Sub btwNewTicket_Click()
     Me.btnAccept.Enabled = True
 End Sub
 
+Private Sub tbTicketNo_AfterUpdate()
+    btnSearchByTicketNo_Click
+End Sub
+Private Sub tbCustID_AfterUpdate()
+    If Me.tbTicketNo.Value <> "" Or Me.tbCustID.Value = "" Then
+          Exit Sub
+    End If
+    btnCustID_Click
+End Sub
+Private Sub tbCustPhone_AfterUpdate()
+    Me.tbCustPhone.Value = Format(Me.tbCustPhone.Value, "(###) ### - ####")
+    If Me.tbTicketNo.Value <> "" Or Me.tbCustPhone.Value = "" Then
+          Exit Sub
+    End If
+    btnCustPhone_Click
+End Sub
 
 Private Sub UserForm_Initialize()
         'Fill ComboBox!
